@@ -4,13 +4,30 @@ import datetime
 import pytz
 import os
 
-TOKEN = os.environ["TOKEN"]
+# --- Render用 ---
+import threading
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return "Bot is alive"
+
+def run_web():
+    app.run(host="0.0.0.0", port=10000)
+
+threading.Thread(target=run_web).start()
+
+# --- Discord設定 ---
+TOKEN = os.getenv("TOKEN")
 
 intents = discord.Intents.default()
 client = discord.Client(intents=intents)
 
-CHANNEL_ID = 1496308886435532945
+CHANNEL_ID = 1496383886435532945
 
+# --- 時間更新 ---
 @tasks.loop(minutes=1)
 async def update_channel_name():
     await client.wait_until_ready()
@@ -19,13 +36,9 @@ async def update_channel_name():
     now_jp = datetime.datetime.now(pytz.timezone("Asia/Tokyo"))
     now_mm = datetime.datetime.now(pytz.timezone("Asia/Yangon"))
 
-    # 5分刻みに丸める
-    jp_min = (now_jp.minute // 5) * 5
-    mm_min = (now_mm.minute // 5) * 5
+    new_name = f"🕒jp{now_jp.strftime('%H：%M')}｜mm{now_mm.strftime('%M：%S')}"
 
-    new_name = f"🕒jp{now.strftime('%H:%M')}｜mm{now.strftime('%M:%S')}"
-
-    if channel.name != new_name:
+    if channel and channel.name != new_name:
         await channel.edit(name=new_name)
 
 @client.event
