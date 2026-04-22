@@ -25,7 +25,7 @@ TOKEN = os.getenv("TOKEN")
 intents = discord.Intents.default()
 client = discord.Client(intents=intents)
 
-CHANNEL_ID = 1496308886435532945
+CHANNEL_ID = 1496330709541978112
 
 # --- 時間更新 ---
 @tasks.loop(minutes=1)
@@ -33,13 +33,21 @@ async def update_channel_name():
     await client.wait_until_ready()
     channel = client.get_channel(CHANNEL_ID)
 
+    if channel is None:
+        print("❌ チャンネル取得できてない")
+        return
+
     now_jp = datetime.datetime.now(pytz.timezone("Asia/Tokyo"))
     now_mm = datetime.datetime.now(pytz.timezone("Asia/Yangon"))
 
-    new_name = f"🕒jp{now_jp.strftime('%H：%M')}｜mm{now_mm.strftime('%M：%S')}"
+    # 半角コロンに修正
+    new_name = f"🕒jp{now_jp.strftime('%H:%M')}｜mm{now_mm.strftime('%M:%S')}"
 
-    if channel and channel.name != new_name:
+    print(f"✅ 更新候補: {new_name}")
+
+    if channel.name != new_name:
         await channel.edit(name=new_name)
+        print("🎉 チャンネル名更新！")
 
 @client.event
 async def on_ready():
