@@ -3,8 +3,6 @@ from discord.ext import tasks
 import datetime
 import pytz
 import os
-
-# --- Render用 ---
 import threading
 from flask import Flask
 
@@ -17,17 +15,15 @@ def home():
 def run_web():
     app.run(host="0.0.0.0", port=10000)
 
-threading.Thread(target=run_web).start()
+threading.Thread(target=run_web, daemon=True).start()
 
-# --- Discord設定 ---
 TOKEN = os.getenv("TOKEN")
 
 intents = discord.Intents.default()
 client = discord.Client(intents=intents)
 
-CHANNEL_ID = 1496330709541978112
+CHANNEL_ID = 1373853116268548150
 
-# --- 時間更新 ---
 @tasks.loop(minutes=1)
 async def update_channel_name():
     await client.wait_until_ready()
@@ -40,18 +36,19 @@ async def update_channel_name():
     now_jp = datetime.datetime.now(pytz.timezone("Asia/Tokyo"))
     now_mm = datetime.datetime.now(pytz.timezone("Asia/Yangon"))
 
-    # 半角コロンに修正
-    new_name = f"🕒jp{now_jp.strftime('%H:%M')}｜mm{now_mm.strftime('%M:%S')}"
+    new_name = f"🕒jp{now_jp.strftime('%H:%M')}｜mm{now_mm.strftime('%H:%M')}"
+    print(f"更新候補: {new_name}")
 
-    print(f"✅ 更新候補: {new_name}")
-
-    if channel.name != new_name:
-        await channel.edit(name=new_name)
-        print("🎉 チャンネル名更新！")
+    try:
+        if channel.name != new_name:
+            await channel.edit(name=new_name)
+            print("🎉 チャンネル名更新")
+    except Exception as e:
+        print(f"❌ 更新失敗: {e}")
 
 @client.event
 async def on_ready():
-    print("Bot起動！")
+    print(f"Bot起動: {client.user}")
     update_channel_name.start()
 
 client.run(TOKEN)
