@@ -25,7 +25,7 @@ TOKEN = os.getenv("TOKEN")
 intents = discord.Intents.default()
 client = discord.Client(intents=intents)
 
-CHANNEL_ID = 1496383886435532945
+CHANNEL_ID = 1496308886435532945
 
 # --- 時間更新 ---
 @tasks.loop(minutes=1)
