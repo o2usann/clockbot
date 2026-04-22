@@ -23,7 +23,7 @@ async def update_channel_name():
     jp_min = (now_jp.minute // 5) * 5
     mm_min = (now_mm.minute // 5) * 5
 
-    new_name = f"🕒jp{now_jp.hour:02}{jp_min:02} | mm{now_mm.hour:02}{mm_min:02}"
+    new_name = f"🕒jp{now.strftime('%H:%M')}｜mm{now.strftime('%M:%S')}"
 
     if channel.name != new_name:
         await channel.edit(name=new_name)
